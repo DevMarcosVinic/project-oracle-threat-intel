@@ -1,0 +1,242 @@
+{
+  "name": "Projeto Oráculo v1.0",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [576, 288],
+      "id": "0477ffea-b61a-4dc3-a0a6-10a696585978",
+      "name": "When chat message received",
+      "webhookId": "<REDACTED_WEBHOOK_ID>"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=## IDENTIDADE E OBJETIVO\nVocê é o ORÁCULO, um estrategista de elite focado em Inteligência Competitiva e Efeitos de Segunda Ordem.\nSua missão não é apenas resumir notícias, mas **projetar cenários futuros** e **recomendar ações lucrativas ou defensivas**.\n\nO usuário quer saber: \"Como isso afeta meu bolso, meus investimentos em tecnologia ou a estabilidade global?\"\n\n## INSTRUÇÕES DE ANÁLISE\nAnalise os dados fornecidos e agrupe os insights nestas 3 categorias macro.\nSeja detalhado na análise de causa e efeito. Não seja superficial.\n\n---\n### 🖥️ HARDWARE, IA & SUPPLY CHAIN\n(Foque em: Preços de GPU/RAM, escassez de chips, avanços de IA, lançamentos que mudam o mercado)\n\n### 💰 CRIPTO, ATIVOS & ECONOMIA\n(Foque em: Bitcoin, Altcoins, Dólar, Ouro, Juros do FED, impacto financeiro)\n\n### 🌍 GEOPOLÍTICA & RISCO GLOBAL\n(Foque em: Guerras que afetam logística, leis de tecnologia, instabilidade governamental)\n---\n\n## FORMATO OBRIGATÓRIO PARA CADA INSIGHT (Use Markdown):\n\n🚨 **[TÍTULO IMPACTANTE DO FATO]**\n📝 **O Cenário:** [Explique o contexto com detalhes suficientes para entender a gravidade]\n🔗 **A Conexão Oculta:** [Use raciocínio lógico avançado. Ex: Guerra no país X corta suprimento do metal Y, que é usado no chip Z]\n🔮 **A Predição:** [O que vai acontecer nos próximos meses? O que vai subir ou cair de preço?]\n💡 **Estratégia Sugerida:** [Dê uma ordem clara: Comprar agora? Vender? Aguardar? Estocar hardware? Monitorar qual indicador?]\n⚠️ **Probabilidade:** [Baixa / Média / Alta / Quase Certeza]\n\n---\n\n## DADOS PARA ANÁLISE:\n{{ $json.text }}",
+        "messages": {
+          "messageValues": [
+            {
+              "message": "## IDENTIDADE Você é o ORÁCULO, uma IA de Inteligência Estratégica. Seu objetivo é proteger o patrimônio do usuário e identificar oportunidades de lucro através da análise de \"Efeitos de Segunda e Terceira Ordem\". Você pensa como um jogador de xadrez misturado com um analista de Supply Chain.  ## MISSÃO Analise a lista de manchetes fornecidas (Geopolítica, Tecnologia, Cripto, Hardware). Ignore fofocas, lançamentos de produtos irrelevantes ou ruído político comum. Fique obcecado por fatos que alteram PREÇOS ou DISPONIBILIDADE.  ## LÓGICA DE ANÁLISE (O ALGORITMO MENTAL) Para cada notícia relevante, aplique a lógica: \"SE X aconteceu, ENTÃO Y será afetado, O QUE CAUSA Z.\" Exemplo: \"Terremoto em Taiwan (Fato) -> TSMC para fábricas (Efeito 1) -> Escassez de Chips (Efeito 2) -> Preço de GPU sobe em 3 meses (Predição).\"  ## FORMATO DE SAÍDA (Obrigatório) Se não houver nada crítico, responda apenas: \"Nenhuma anomalia detectada no ciclo atual.\"  Se houver insights, use estritamente este formato para o Telegram:  🚨 **ALERTA ORÁCULO** 🚨  🌍 **O Fato:** [Resumo curto da notícia, ex: China restringe exportação de Gálio] 🔗 **A Conexão:** [Explique a lógica técnica/econômica. Por que isso importa?] 🔮 **A Predição:** [O que vai acontecer? Ex: Preço de telas OLED vai subir. Criptos de IA podem valorizar.] ⚠️ **Probabilidade:** [Baixa / Média / Alta / Quase Certeza] 💡 **Ação Sugerida:** [Ex: Compre RAM agora / Venda tal ativo / Aguarde]  --- (Repita para cada insight relevante encontrado)."
+            }
+          ]
+        },
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.9,
+      "position": [688, 400],
+      "id": "4189fe60-fa52-44b8-b34a-75663269ae76",
+      "name": "Basic LLM Chain",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [688, 544],
+      "id": "f2f0b659-e39c-412d-b13f-6c2524180be9",
+      "name": "Google Gemini Chat Model",
+      "retryOnFail": true,
+      "waitBetweenTries": 5000,
+      "credentials": {
+        "googlePalmApi": {
+          "id": "<REDACTED_GOOGLE_PALM_ID>",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-208, 400],
+      "id": "cb604dfb-a562-4be7-8735-1338b06f80b4",
+      "name": "Agendamento"
+    },
+    {
+      "parameters": {
+        "jsCode": "// LISTA DE FONTES DE INTELIGÊNCIA (Formatada)\n// Inclui feeds diretos e bridges via Google News para sites sem RSS oficial\n\nconst urls = [\n  // --- GEOPOLÍTICA & MACROECONOMIA ---\n  \"https://www.aljazeera.com/xml/rss/all.xml\", // Al Jazeera (Visão Oriente/Global)\n  \"https://news.google.com/rss/search?q=site:reuters.com/world+when:1d&hl=en-US&gl=US&ceid=US:en\", // Reuters World (Via Google News - Bypass)\n  \"https://oilprice.com/rss/main\", // OilPrice (Energia dita o custo industrial)\n  \"https://www.federalreserve.gov/feeds/press_all.xml\", // FED Press Releases (Juros EUA)\n\n  // --- HARDWARE & SUPPLY CHAIN (Preços de Peças) ---\n  \"https://news.google.com/rss/search?q=site:trendforce.com/presscenter+when:7d&hl=en-US&gl=US&ceid=US:en\", // TrendForce (O \"Oráculo\" dos preços de RAM/SSD)\n  \"https://www.digitimes.com/rss/daily.xml\", // Digitimes (Cadeia de suprimentos Taiwan)\n  \"https://news.google.com/rss/search?q=site:wccftech.com+hardware+when:2d&hl=en-US&gl=US&ceid=US:en\", // Wccftech (Rumores de Hardware)\n  \"https://news.google.com/rss/search?q=site:videocardz.com+when:2d&hl=en-US&gl=US&ceid=US:en\", // Videocardz (Vazamentos de GPU)\n\n  // --- CRIPTO & ATIVOS ---\n  \"https://www.coindesk.com/arc/outboundfeeds/rss/\", // CoinDesk (Feed Oficial Arc)\n  \"https://cointelegraph.com/rss\", // Cointelegraph\n  // Whale Alert não tem RSS. Usamos busca de \"Whale Alert\" no Google News para pegar notícias sobre grandes movimentos\n  \"https://news.google.com/rss/search?q=Whale+Alert+crypto+transaction+when:1d&hl=en-US&gl=US&ceid=US:en\", \n\n  // --- CIBERSEGURANÇA & RISCO DIGITAL ---\n  \"https://thehackernews.com/rss.xml\", // The Hacker News\n  \"https://www.bleepingcomputer.com/feed/\" // BleepingComputer\n];\n\n// Mapeia para o formato que o n8n lê (um item por execução)\nreturn urls.map(url => ({ json: { url } }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [16, 400],
+      "id": "440b90bf-b86c-4641-88cf-6d8e29812443",
+      "name": "Lista de Fontes"
+    },
+    {
+      "parameters": {
+        "jsCode": "// AGREGADOR\n// Este nó recebe centenas de notícias vindas de todos os RSS acima\n// Ele vai filtrar, limpar e juntar tudo num texto só para a IA\n\n// 1. Pega todos os itens recebidos\nconst allItems = items;\n\n// 2. Opcional: Filtrar duplicatas por titulo ou link (simples)\nconst uniqueItems = [];\nconst seenUrls = new Set();\n\nfor (const item of allItems) {\n  const link = item.json.link || item.json.guid;\n  if (!seenUrls.has(link)) {\n    seenUrls.add(link);\n    uniqueItems.push(item);\n  }\n}\n\n// 3. Limita para as 40 mais recentes (para não estourar o limite da IA)\n// Assumindo que o RSS já traz as novas primeiro, pegamos o slice inicial\nconst recentNews = uniqueItems.slice(0, 40);\n\n// 4. Monta o texto final\nlet combinedText = \"\";\nrecentNews.forEach(item => {\n  const title = item.json.title || \"Sem Titulo\";\n  const desc = item.json.contentSnippet || item.json.description || \"\";\n  combinedText += `Machete: ${title}\\nResumo: ${desc}\\nLink: ${item.json.link}\\n---\\n`;\n});\n\nreturn [{ json: { text: combinedText } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [464, 400],
+      "id": "bc2610b9-7f82-4cdd-9a3b-6850c07f7f48",
+      "name": "Agregador de Dados"
+    },
+    {
+      "parameters": {
+        "chatId": "<REDACTED_CHAT_ID>",
+        "text": "={{ $json.text_part }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "Markdown"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1184, 400],
+      "id": "d48cda95-8fa1-47df-9742-1efd69bfdc10",
+      "name": "Telegram Bot",
+      "webhookId": "<REDACTED_WEBHOOK_ID>",
+      "credentials": {
+        "telegramApi": {
+          "id": "<REDACTED_TELEGRAM_API_ID>",
+          "name": "Telegram Projeto Oraculo"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "ignoreSSL": true
+        }
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [240, 400],
+      "id": "6dfc565b-35c7-44de-bbbe-73ae26ab7dfe",
+      "name": "Leitor RSS",
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "jsCode": "// CONFIGURAÇÃO\nconst MAX_LENGTH = 3800; // Deixamos uma margem de segurança (limite é 4096)\nconst content = items[0].json.text; // O texto que veio da IA\n\n// Se o texto for curto, passa direto\nif (content.length <= MAX_LENGTH) {\n  return [{ json: { text_part: content } }];\n}\n\n// Se for longo, divide em pedaços\nconst chunks = content.match(new RegExp(`[\\\\s\\\\S]{1,${MAX_LENGTH}}`, 'g')) || [];\n\n// Retorna vários itens. O n8n vai rodar o nó do Telegram uma vez para cada item.\nreturn chunks.map((chunk, index) => ({\n  json: {\n    text_part: `(Parte ${index + 1}/${chunks.length})\\n\\n${chunk}`\n  }\n}));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1008, 400],
+      "id": "517eb730-50ed-4a7c-9f42-ba68cdbfc1cc",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agendamento": {
+      "main": [
+        [
+          {
+            "node": "Lista de Fontes",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lista de Fontes": {
+      "main": [
+        [
+          {
+            "node": "Leitor RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leitor RSS": {
+      "main": [
+        [
+          {
+            "node": "Agregador de Dados",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Agregador de Dados": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Telegram Bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "4ae55b6c-ba4d-4220-8a22-dee88c4d772a",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "<REDACTED_INSTANCE_ID>"
+  },
+  "id": "CUDEslp3OPJhQQq1F-C8r",
+  "tags": []
+}
